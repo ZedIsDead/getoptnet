@@ -203,11 +203,13 @@ namespace NMaier.GetOptNet
         protected uint min;
         protected uint max;
         protected uint added = 0;
-        public MultipleArgumentHandler(Object aObj, MemberInfo aInfo, Type aType, uint aMin, uint aMax)
+        private string[] allowedValues;
+        public MultipleArgumentHandler(Object aObj, MemberInfo aInfo, Type aType, uint aMin, uint aMax,string[] allowedValues)
             : base(aObj, aInfo, aType, false, true, aMin > 0)
         {
             min = aMin;
             max = aMax;
+            this.allowedValues = allowedValues;
         }
         public override void Finish()
         {
@@ -225,11 +227,20 @@ namespace NMaier.GetOptNet
         public uint Min { get { return min; } }
         public uint Max { get { return max; } }
 
-        protected void CheckAssign()
+        protected void CheckAssign(string toAssign)
         {
             if (max > 0 && added == max)
             {
                 throw new MultipleArgumentCountException(String.Format("Too many arguments supplied for {0}", Name.ToUpper()));
+            }
+            if (allowedValues != null)
+            {
+                var found = Array.Find(allowedValues, x => String.Compare(x, toAssign, true)==0);
+                
+                if (String.IsNullOrEmpty(found))
+                {
+                    throw new MultipleArgumentCountException(String.Format("Illegal argument {0} supplied for {1} allowed values are {2}", toAssign, Name.ToUpper(), String.Join(" || ", allowedValues)));
+                }
             }
         }
     }
@@ -238,8 +249,8 @@ namespace NMaier.GetOptNet
     {
         private Type listType;
         private object list;
-        public ArrayArgumentHandler(Object aObj, MemberInfo aInfo, Type aType, uint aMin, uint aMax)
-            : base(aObj, aInfo, aType, aMin, aMax)
+        public ArrayArgumentHandler(Object aObj, MemberInfo aInfo, Type aType, uint aMin, uint aMax, string[] allowedValues)
+            : base(aObj, aInfo, aType, aMin, aMax, allowedValues)
         {
             elementType = type.GetElementType();
             listType = typeof(List<>).MakeGenericType(new Type[] { elementType });
@@ -247,7 +258,7 @@ namespace NMaier.GetOptNet
         }
         public override void Assign(string toAssign)
         {
-            CheckAssign();
+            CheckAssign(toAssign);
             listType.GetMethod("Add").Invoke(list, new object[] { InternalConvert(toAssign, elementType) });
             added++;
         }
@@ -267,8 +278,8 @@ namespace NMaier.GetOptNet
     sealed internal class IListArgumentHandler : MultipleArgumentHandler
     {
         private object list;
-        public IListArgumentHandler(Object aObj, MemberInfo aInfo, Type aType, uint aMin, uint aMax)
-            : base(aObj, aInfo, aType, aMin, aMax)
+        public IListArgumentHandler(Object aObj, MemberInfo aInfo, Type aType, uint aMin, uint aMax, string[] allowedValues)
+            : base(aObj, aInfo, aType, aMin, aMax, allowedValues)
         {
             switch (info.MemberType)
             {
@@ -286,7 +297,7 @@ namespace NMaier.GetOptNet
 
         public override void Assign(string toAssign)
         {
-            CheckAssign();
+            CheckAssign(toAssign);
             type.GetMethod("Add").Invoke(list, new object[] { InternalConvert(toAssign, elementType) });
             added++;
             wasSet = true;

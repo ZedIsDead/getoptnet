@@ -12,9 +12,8 @@ namespace TestApp
         class Opts : GetOpt
         {
 
-            [Parameters(Min = 1, Max = 3)]
+            [Parameters(Min = 1, Max = 1, AllowedValues = new string[]{"test1","test2"})]
             public List<String> Parameters = new List<string>();
-            //public string[] Parameters = new string[0];
 
             [Argument(Helptext = "Provide some string")]
             public string Str = "some string";
@@ -67,7 +66,7 @@ namespace TestApp
 
             [Argument(Required = true)]
             [ShortArgument('r')]
-            public string required = null;
+            public string Required = null;
 
             [Argument]
             [FlagArgument(true)]
@@ -77,9 +76,11 @@ namespace TestApp
             [FlagArgument(false)]
             public bool defaultTrue = false;
 
-            [Argument]
-            [MultipleArguments(Exact = 2)]
-            public string[] requiredTwo = null;
+            [Argument(Helptext = "exact two arguments are required out of (one || two || three)")]
+            [ShortArgument('t')]
+            [MultipleArguments(Exact = 2,AllowedValues = new string[]{"one","two","three"})]
+            public string[] RequiredTwo = null;
+ 
         }
 
         static void Main(string[] args)
@@ -95,6 +96,7 @@ namespace TestApp
                 Console.WriteLine("Printing Input");
                 Console.WriteLine("Str: " + opts.Str);
                 Console.WriteLine("Flag: " + opts.Flag);
+                Console.WriteLine("Required: " + opts.Required);
                 Console.WriteLine("Counter: " + opts.Counter);
                 Console.WriteLine("Validated prop: " + opts.Prop);
                 Console.WriteLine("SomeInt: " + opts.SomeInt);
@@ -107,7 +109,6 @@ namespace TestApp
                     Console.WriteLine("Arr: {0}", p);
                 }
 
-
                 foreach (string p in opts.Multi)
                 {
                     Console.WriteLine("Multi: {0}", p);
@@ -117,6 +118,12 @@ namespace TestApp
                 {
                     Console.WriteLine("Param: {0}", p);
                 }
+
+                foreach (string p in opts.RequiredTwo)
+                {
+                    Console.WriteLine("Required Two: {0}", p);
+                }
+
                 Console.WriteLine();
                 opts.PrintUsage();
             }

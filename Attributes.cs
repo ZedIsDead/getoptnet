@@ -24,6 +24,8 @@
  */
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace NMaier.GetOptNet
 {
@@ -248,6 +250,7 @@ namespace NMaier.GetOptNet
     {
         private uint min = 0;
         private uint max = 0;
+        private string[] allowedValues;
 
         /// <summary>
         /// Minimum number of required parameters
@@ -284,6 +287,14 @@ namespace NMaier.GetOptNet
                 min = max = value;
             }
         }
+        /// <summary>
+        /// List of allowed values as parameters if empty all values will be allowed
+        /// </summary>
+        public string[] AllowedValues
+        {
+            get { return allowedValues; }
+            set { allowedValues = value; }
+        }
     }
 
     /// <summary>
@@ -292,7 +303,6 @@ namespace NMaier.GetOptNet
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     sealed public class Parameters : MultipleArguments {
         private string helpvar = "param";
-
         /// <summary>
         /// Help variable text to be used in usage output
         /// </summary>
@@ -301,6 +311,9 @@ namespace NMaier.GetOptNet
             get { return helpvar; }
             set { helpvar = value; }
         }
+
+
+        
     }
 
 

@@ -72,11 +72,11 @@ namespace NMaier.GetOptNet
                         Type type = getMemberType(info);
                         if (type.IsArray)
                         {
-                            parameters = new ArrayArgumentHandler(this, info, type, paramArgs[0].Min, paramArgs[0].Max);
+                            parameters = new ArrayArgumentHandler(this, info, type, paramArgs[0].Min, paramArgs[0].Max, paramArgs[0].AllowedValues);
                         }
                         else if (isIList(type))
                         {
-                            parameters = new IListArgumentHandler(this, info, type, paramArgs[0].Min, paramArgs[0].Max);
+                            parameters = new IListArgumentHandler(this, info, type, paramArgs[0].Min, paramArgs[0].Max,paramArgs[0].AllowedValues);
                         }
                         else
                         {
@@ -112,19 +112,21 @@ namespace NMaier.GetOptNet
                     ArgumentHandler ai;
                     Type memberType = getMemberType(info);
                     uint min = 0, max = 0;
+                    string[] allowedValues = null;
                     MultipleArguments[] margs = info.GetCustomAttributes(typeof(MultipleArguments), true) as MultipleArguments[];
                     if (margs.Length == 1)
                     {
                         min = margs[0].Min;
                         max = margs[0].Max;
+                        allowedValues = margs[0].AllowedValues;
                     }
                     if (memberType.IsArray)
                     {
-                        ai = new ArrayArgumentHandler(this, info, memberType, min, max);
+                        ai = new ArrayArgumentHandler(this, info, memberType, min, max, allowedValues);
                     }
                     else if (isIList(memberType))
                     {
-                        ai = new IListArgumentHandler(this, info, memberType, min, max);
+                        ai = new IListArgumentHandler(this, info, memberType, min, max, allowedValues);
                     }
                     else
                     {
